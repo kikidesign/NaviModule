@@ -37,16 +37,16 @@
 
 - (void)initMapView
 {
+
     if (self.mapView == nil)
     {
         self.mapView = [[MAMapView alloc] initWithFrame:self.view.bounds];
     }
-    
+
     self.mapView.frame = self.view.bounds;
     
     self.mapView.delegate = self;
-    
-    // self.mapView.visibleMapRect = MAMapRectMake(220880104, 101476980, 272496, 466656);
+
 }
 
 - (void)initBaseNavigationBar
@@ -92,14 +92,14 @@
     [super viewDidLoad];
     
     self.view.backgroundColor = [UIColor whiteColor];
-    
+    //设置导航页面标题
     [self initTitle:self.title];
-    
-    [self initBaseNavigationBar];
+    //添加back按钮返回上级
+//    [self initBaseNavigationBar];
     
     [self initMapView];
     
-    [self initNaviManager];
+//    [self initNaviManager];
 }
 
 

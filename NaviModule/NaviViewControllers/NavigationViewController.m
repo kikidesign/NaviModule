@@ -13,8 +13,6 @@
 #import "MoreMenuView.h"
 #import "APIKey.h"
 
-#define kSetingViewHeight 215
-
 typedef NS_ENUM(NSInteger, MapSelectPointState)
 {
     MapSelectPointStateNone = 0,
@@ -94,7 +92,12 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 - (void)viewDidLoad
 {
-//    NSLog(@"viewDidLoad");
+
+    //设置出发点为当前位置
+    _startCurrLoc = YES;
+    
+    _selectPointState = MapSelectPointStateNone;
+    
     if ([APIKey length] == 0)
     {
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:@"提示" message:@"apiKey为空，请检查key是否正确设置" delegate:nil cancelButtonTitle:@"OK" otherButtonTitles:nil, nil];
@@ -165,9 +168,9 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 //    NSLog(@"configMapView");
     [self.mapView setDelegate:self];
     
-    [self.mapView setFrame:CGRectMake(0, kSetingViewHeight,
-                                      self.view.bounds.size.width,
-                                      self.view.bounds.size.height - kSetingViewHeight)];
+    //去掉状态栏后的屏幕尺寸
+    CGRect rect = [ UIScreen mainScreen ].applicationFrame;
+    [self.mapView setFrame:rect];
     
     [self.view insertSubview:self.mapView atIndex:0];
     
@@ -192,35 +195,24 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 - (void)configSettingViews
 {
 //    NSLog(@"configSettingViews");
-    UILabel *startPointLabel = [self createTitleLabel:@"起   点"];
-    startPointLabel.left     = 30;
-    startPointLabel.top      = 50;
-    [self.view addSubview:startPointLabel];
     
-    _startPointCombox = [[MACombox alloc] initWithItems:@[@"", @"使用当前位置"]];
-    _startPointCombox.delegate = self;
-    _startPointCombox.left     = 90;
-    _startPointCombox.top      = 50;
-    [self.view insertSubview:_startPointCombox atIndex:0];
-    
-    
-    UILabel *endPointLabel = [self createTitleLabel:@"终   点"];
-    endPointLabel.left     = 30;
-    endPointLabel.top      = 80;
-    [self.view addSubview:endPointLabel];
-    
-    _endPointCombox = [[MACombox alloc] initWithItems:@[@"", @"地图选点"]];
-    _endPointCombox.delegate = self;
-    _endPointCombox.left     = 90;
-    _endPointCombox.top      = 80;
-    [self.view insertSubview:_endPointCombox atIndex:0];
-    
-    UIButton *routeBtn = [self createToolButton];
-    [routeBtn setTitle:@"路径规划" forState:UIControlStateNormal];
-    [routeBtn addTarget:self action:@selector(gpsNavi:) forControlEvents:UIControlEventTouchUpInside];
-    routeBtn.left = 60;
-    routeBtn.top  = 175;
-    [self.view addSubview:routeBtn];
+//    UILabel *endPointLabel = [self createTitleLabel:@"终   点"];
+//    endPointLabel.left     = 30;
+//    endPointLabel.top      = 80;
+//    [self.view addSubview:endPointLabel];
+//    
+//    _endPointCombox = [[MACombox alloc] initWithItems:@[@"", @"地图选点"]];
+//    _endPointCombox.delegate = self;
+//    _endPointCombox.left     = 90;
+//    _endPointCombox.top      = 80;
+//    [self.view insertSubview:_endPointCombox atIndex:0];
+//    
+//    UIButton *routeBtn = [self createToolButton];
+//    [routeBtn setTitle:@"路径规划" forState:UIControlStateNormal];
+//    [routeBtn addTarget:self action:@selector(gpsNavi:) forControlEvents:UIControlEventTouchUpInside];
+//    routeBtn.left = 60;
+//    routeBtn.top  = 175;
+//    [self.view addSubview:routeBtn];
 
 }
 
@@ -267,7 +259,6 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 - (void)initSettingState
 {
 //    NSLog(@"initSettingState");
-    _startPointCombox.inputTextField.text = @"";
     _wayPointCombox.inputTextField.text   = @"";
     _endPointCombox.inputTextField.text   = @"";
     
@@ -598,74 +589,19 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 - (void)dropMenuWillShow:(MACombox *)combox
 {
     [self.view bringSubviewToFront:combox];
-    
-    [_startPointCombox hideDropMenu];
+
     [_endPointCombox   hideDropMenu];
-    [_wayPointCombox   hideDropMenu];
     [_strategyCombox   hideDropMenu];
 }
 
 
 - (void)maCombox:(MACombox *)macombox didSelectItem:(NSString *)item
 {
-    if (macombox == _startPointCombox)
-    {
-        if ([item isEqualToString:@"地图选点"])
-        {
-            _selectPointState = MapSelectPointStateStartPoint;
-            
-            _wayPointCombox.inputTextField.text = @"";
-            _endPointCombox.inputTextField.text = @"";
-            
-            _startCurrLoc = NO;
-        }
-        else if ([item isEqualToString:@"使用当前位置"])
-        {
-            if (_beginAnnotation)
-            {
-                [self.mapView removeAnnotation:_beginAnnotation];
-                _beginAnnotation = nil;
-            }
-            _startCurrLoc = YES;
-            if (_selectPointState == MapSelectPointStateStartPoint)
-            {
-                _selectPointState = MapSelectPointStateNone;
-            }
-        }
-        else
-        {
-            _startCurrLoc = NO;
-            if (_selectPointState == MapSelectPointStateStartPoint)
-            {
-                _selectPointState = MapSelectPointStateNone;
-            }
-        }
-    }
-    else if (macombox == _wayPointCombox)
-    {
-        if ([item isEqualToString:@"地图选点"])
-        {
-            _selectPointState = MapSelectPointStateWayPoint;
-            
-            if (!_startCurrLoc) _startPointCombox.inputTextField.text = @"";
-            _endPointCombox.inputTextField.text = @"";
-        }
-        else
-        {
-            if (_selectPointState == MapSelectPointStateWayPoint)
-            {
-                _selectPointState = MapSelectPointStateNone;
-            }
-        }
-    }
-    else if (macombox == _endPointCombox)
+    if (macombox == _endPointCombox)
     {
         if ([item isEqualToString:@"地图选点"])
         {
             _selectPointState = MapSelectPointStateEndPoint;
-            
-            if (!_startCurrLoc) _startPointCombox.inputTextField.text = @"";
-            _wayPointCombox.inputTextField.text = @"";
         }
         else
         {
