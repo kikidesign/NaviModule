@@ -142,7 +142,7 @@
                                                             @"电子眼和特殊道路设施",
                                                             nil]];
     detectedModeSegmentedControl.selectedSegmentIndex   = 1;
-    detectedModeSegmentedControl.segmentedControlStyle  = UISegmentedControlStyleBar;
+//    detectedModeSegmentedControl.segmentedControlStyle= UISegmentedControlStyleBar;
     [detectedModeSegmentedControl addTarget:self action:@selector(detectedModeAction:) forControlEvents:UIControlEventValueChanged];
     
     UIBarButtonItem *detectedModeItem = [[UIBarButtonItem alloc] initWithCustomView:detectedModeSegmentedControl];

@@ -42,6 +42,7 @@
 		B39AC3871B253FB500426DD9 /* UIView+Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = B39AC3861B253FB500426DD9 /* UIView+Geometry.m */; };
 		B39AC38C1B2543E800426DD9 /* NavPointAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = B39AC38B1B2543E800426DD9 /* NavPointAnnotation.m */; };
 		B39AC3901B25445800426DD9 /* MoreMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = B39AC38F1B25445800426DD9 /* MoreMenuView.m */; };
+		B3F160F01B26BC15008D302D /* AMapSearchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3F160EF1B26BC15008D302D /* AMapSearchKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -111,6 +112,7 @@
 		B39AC38E1B25445800426DD9 /* MoreMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MoreMenuView.h; sourceTree = "<group>"; };
 		B39AC38F1B25445800426DD9 /* MoreMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MoreMenuView.m; sourceTree = "<group>"; };
 		B39AC3911B2548D000426DD9 /* APIKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APIKey.h; sourceTree = "<group>"; };
+		B3F160EF1B26BC15008D302D /* AMapSearchKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AMapSearchKit.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,6 +120,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B3F160F01B26BC15008D302D /* AMapSearchKit.framework in Frameworks */,
 				B39AC3831B253D9700426DD9 /* AMapNaviKit.framework in Frameworks */,
 				B39AC37F1B253D1800426DD9 /* AudioToolbox.framework in Frameworks */,
 				B39AC37D1B253D1000426DD9 /* AVFoundation.framework in Frameworks */,
@@ -275,6 +278,7 @@
 		B39AC3881B253FBE00426DD9 /* Framework */ = {
 			isa = PBXGroup;
 			children = (
+				B3F160EF1B26BC15008D302D /* AMapSearchKit.framework */,
 				B39AC3581B2534D900426DD9 /* iflyMSC.framework */,
 				B39AC3821B253D9700426DD9 /* AMapNaviKit.framework */,
 				B39AC3801B253D4400426DD9 /* AddressBook.framework */,

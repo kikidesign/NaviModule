@@ -12,6 +12,7 @@
 #import "RouteShowViewController.h"
 #import "MoreMenuView.h"
 #import "APIKey.h"
+#import <AMapSearchKit/AMapSearchAPI.h>
 
 typedef NS_ENUM(NSInteger, MapSelectPointState)
 {
@@ -38,6 +39,7 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 @interface NavigationViewController () <AMapNaviViewControllerDelegate,
                                         MAComboxDelegate,
+                                        AMapSearchDelegate,
                                         UIGestureRecognizerDelegate,
                                         MoreMenuViewDelegate>
 {
@@ -47,6 +49,9 @@ typedef NS_ENUM(NSInteger, TravelTypes)
     MACombox *_endPointCombox;
     MACombox *_wayPointCombox;
     MACombox *_strategyCombox;
+    
+    CLLocation *_currentLocation;
+    AMapSearchAPI *_search;
     
     MapSelectPointState _selectPointState;
     NavigationTypes     _naviType;
@@ -109,6 +114,8 @@ typedef NS_ENUM(NSInteger, TravelTypes)
     
     [MAMapServices sharedServices].apiKey = (NSString *)APIKey;
     
+    _search = [[AMapSearchAPI alloc] initWithSearchKey:(NSString *)APIKey Delegate:self];
+    
     [super viewDidLoad];
     
     [self initNaviViewController];
@@ -116,8 +123,25 @@ typedef NS_ENUM(NSInteger, TravelTypes)
     [self configSettingViews];
     
     [self initGestureRecognizer];
+    
 }
 
+- (void)onPlaceSearchDone:(AMapPlaceSearchRequest *)request response:(AMapPlaceSearchResponse *)response
+{
+    NSLog(@"request: %@", request);
+    NSLog(@"response: %@", response);
+    
+    if (response.pois.count > 0)
+    {
+//        _pois = response.pois;
+//        
+//        [_tableView reloadData];
+//        
+//        // 清空标注
+//        [self.mapView removeAnnotations:_annotations];
+//        [_annotations removeAllObjects];
+    }
+}
 
 - (void)viewWillAppear:(BOOL)animated
 {
@@ -140,6 +164,22 @@ typedef NS_ENUM(NSInteger, TravelTypes)
     [self.mapView removeGestureRecognizer:_mapViewTapGesture];
 }
 
+
+- (void)searchAction
+{
+    NSLog(@"_currentLocation %@", _currentLocation);
+    NSLog(@"search %@", _search);
+    if (_currentLocation == nil || _search == nil)
+    {
+        NSLog(@"search failed");
+        return;
+    }
+    AMapPlaceSearchRequest *request = [[AMapPlaceSearchRequest alloc] init];
+    request.searchType = AMapSearchType_PlaceAround;
+    request.location = [AMapGeoPoint locationWithLatitude:_currentLocation.coordinate.latitude longitude:_currentLocation.coordinate.longitude];
+    request.keywords = @"餐饮";
+    [_search AMapPlaceSearch:request];
+}
 
 
 #pragma mark - Utils
@@ -448,15 +488,17 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 - (void)mapView:(MAMapView *)mapView didUpdateUserLocation:(MAUserLocation *)userLocation updatingLocation:(BOOL)updatingLocation
 {
 //    //取出当前位置的坐标
-//    NSLog(@"latitude : %f,longitude: %f",userLocation.coordinate.latitude,userLocation.coordinate.longitude);
-    
+    _currentLocation = [userLocation.location copy];
+//    NSLog(@"_currentLocation latitude : %f,longitude: %f",_currentLocation.coordinate.latitude,_currentLocation.coordinate.longitude);
     // 第一次定位时才将定位点显示在地图中心
     if (!_hasCurrLoc)
     {
         _hasCurrLoc = YES;
-        
+
         [self.mapView setCenterCoordinate:userLocation.coordinate];
+        [self searchAction];
         [self.mapView setZoomLevel:12 animated:NO];
+        
     }
 }
 

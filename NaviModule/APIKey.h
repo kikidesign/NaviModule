@@ -11,6 +11,6 @@
 
 /* 使用高德SDK, 请首先注册APIKey, 注册APIKey请参考 http://lbs.amap.com/console/key
  */
-const static NSString *APIKey = @"62acbe9202d3f65421a99f9ec7e040db";
+NSString const static *APIKey = @"62acbe9202d3f65421a99f9ec7e040db";
 
 #endif
