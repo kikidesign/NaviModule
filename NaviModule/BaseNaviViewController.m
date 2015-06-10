@@ -52,7 +52,7 @@
 - (void)initBaseNavigationBar
 {
     self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"Back"
-                                                                             style:UIBarButtonItemStyleBordered
+                                                                             style:UIBarButtonItemStylePlain
                                                                             target:self
                                                                             action:@selector(returnAction)];
 }
@@ -99,7 +99,7 @@
     
     [self initMapView];
     
-//    [self initNaviManager];
+    [self initNaviManager];
 }
 
 

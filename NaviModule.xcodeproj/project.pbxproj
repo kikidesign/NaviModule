@@ -42,6 +42,7 @@
 		B39AC3871B253FB500426DD9 /* UIView+Geometry.m in Sources */ = {isa = PBXBuildFile; fileRef = B39AC3861B253FB500426DD9 /* UIView+Geometry.m */; };
 		B39AC38C1B2543E800426DD9 /* NavPointAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = B39AC38B1B2543E800426DD9 /* NavPointAnnotation.m */; };
 		B39AC3901B25445800426DD9 /* MoreMenuView.m in Sources */ = {isa = PBXBuildFile; fileRef = B39AC38F1B25445800426DD9 /* MoreMenuView.m */; };
+		B39C05071B27DB270096805B /* navi.png in Resources */ = {isa = PBXBuildFile; fileRef = B39C05061B27DB270096805B /* navi.png */; };
 		B3F160F01B26BC15008D302D /* AMapSearchKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3F160EF1B26BC15008D302D /* AMapSearchKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -112,6 +113,7 @@
 		B39AC38E1B25445800426DD9 /* MoreMenuView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MoreMenuView.h; sourceTree = "<group>"; };
 		B39AC38F1B25445800426DD9 /* MoreMenuView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MoreMenuView.m; sourceTree = "<group>"; };
 		B39AC3911B2548D000426DD9 /* APIKey.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = APIKey.h; sourceTree = "<group>"; };
+		B39C05061B27DB270096805B /* navi.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = navi.png; sourceTree = "<group>"; };
 		B3F160EF1B26BC15008D302D /* AMapSearchKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = AMapSearchKit.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -190,6 +192,7 @@
 			isa = PBXGroup;
 			children = (
 				B39AC3171B2532A500426DD9 /* Info.plist */,
+				B39C05061B27DB270096805B /* navi.png */,
 				B39AC3181B2532A500426DD9 /* main.m */,
 			);
 			name = "Supporting Files";
@@ -392,6 +395,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B39AC36A1B25350300426DD9 /* dropup.png in Resources */,
+				B39C05071B27DB270096805B /* navi.png in Resources */,
 				B39AC3221B2532A500426DD9 /* Main.storyboard in Resources */,
 				B39AC3551B25349800426DD9 /* AMapNavi.bundle in Resources */,
 				B39AC3271B2532A500426DD9 /* LaunchScreen.xib in Resources */,

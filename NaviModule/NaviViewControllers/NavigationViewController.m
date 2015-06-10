@@ -43,6 +43,11 @@ typedef NS_ENUM(NSInteger, TravelTypes)
                                         UIGestureRecognizerDelegate,
                                         MoreMenuViewDelegate>
 {
+    CGRect rect;
+    CGSize size;
+    CGFloat width;
+    CGFloat height;
+    
     UILabel *_strategyLabel;
     
     MACombox *_startPointCombox;
@@ -52,12 +57,16 @@ typedef NS_ENUM(NSInteger, TravelTypes)
     
     CLLocation *_currentLocation;
     AMapSearchAPI *_search;
+    NSArray *_pois;
+    NSMutableArray *_annotations;
+    UIView *_resultsView;
+    NSInteger currentTag;
     
     MapSelectPointState _selectPointState;
     NavigationTypes     _naviType;
     TravelTypes         _travelType;
     
-    BOOL _startCurrLoc;   // 起始点使用当前位置？
+    BOOL _startCurrLoc;   // 起始点是否使用当前位置
     BOOL _hasCurrLoc;
     
     UITapGestureRecognizer *_mapViewTapGesture;
@@ -97,7 +106,12 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 - (void)viewDidLoad
 {
-
+    rect = [[UIScreen mainScreen] bounds];
+    size = rect.size;
+    width = size.width;
+    height = size.height;
+    currentTag=0;
+    
     //设置出发点为当前位置
     _startCurrLoc = YES;
     
@@ -128,19 +142,99 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 - (void)onPlaceSearchDone:(AMapPlaceSearchRequest *)request response:(AMapPlaceSearchResponse *)response
 {
-    NSLog(@"request: %@", request);
-    NSLog(@"response: %@", response);
-    
+    // 清空标注
+    if(_resultsView){
+        [_resultsView removeFromSuperview];
+    }
+    [self.mapView removeAnnotations:_annotations];
+    [_annotations removeAllObjects];
     if (response.pois.count > 0)
     {
-//        _pois = response.pois;
-//        
-//        [_tableView reloadData];
-//        
-//        // 清空标注
-//        [self.mapView removeAnnotations:_annotations];
-//        [_annotations removeAllObjects];
+        _pois = response.pois;
+        _resultsView=[[ UIView alloc]initWithFrame:CGRectMake(0,height-100,size.width*_pois.count,80)];
+        [self.view addSubview:_resultsView];
+        for(NSUInteger i=0;i<_pois.count;i++){
+            UIView *poi_view = [[UIView alloc] initWithFrame:CGRectMake(20+i*width, 10, width-40, 80)];
+            poi_view.autoresizingMask = UIViewAutoresizingFlexibleRightMargin |
+            UIViewAutoresizingFlexibleTopMargin;
+            poi_view.backgroundColor = [UIColor whiteColor];
+            [_resultsView addSubview:poi_view];
+            [poi_view.layer setBorderWidth:1]; //边框宽度
+            [poi_view.layer setBorderColor:[[UIColor colorWithRed:0.80 green:0.80 blue:0.80 alpha:0.80] CGColor]]; //边框颜色
+            
+            AMapPOI *poi = _pois[i];
+            UILabel *poi_title=[[UILabel alloc]initWithFrame:CGRectMake(20, 16, 200, 15)];
+            poi_title.text = [NSString stringWithFormat:@"%lu.%@",(unsigned long)i+1,poi.name];
+            poi_title.font = [UIFont systemFontOfSize:15];
+            [poi_title setTextColor:[UIColor blackColor]];
+            [poi_view addSubview:poi_title];
+            
+            UILabel *poi_content=[[UILabel alloc]initWithFrame:CGRectMake(20, 47, 200, 15)];
+            poi_content.text = poi.address;
+            poi_content.font = [UIFont systemFontOfSize:15];
+            [poi_content setTextColor:[UIColor blackColor]];
+            [poi_view addSubview:poi_content];
+            
+            UIButton *navi_btn = [UIButton buttonWithType:UIButtonTypeRoundedRect];
+            navi_btn.frame = CGRectMake(width-100, 10, 30, 80);
+            navi_btn.tag=i;
+
+            UILabel *lable1=[[UILabel alloc]initWithFrame:CGRectMake(10, 37, 40, 15)];
+            lable1.text = [[NSString alloc] initWithFormat:@"导航"];
+            lable1.font = [UIFont systemFontOfSize:15.0];
+            lable1.tintColor=[UIColor blackColor];
+            [navi_btn addSubview:lable1];
+            UIImageView *pic = [[UIImageView alloc]initWithFrame:CGRectMake(10, 0, 30, 30)];
+            [pic setImage:[UIImage imageNamed:@"navi"]];
+            [navi_btn addSubview:pic];
+            [navi_btn addTarget:self action:@selector(gpsNavi:) forControlEvents:UIControlEventTouchUpInside];
+            [poi_view addSubview:navi_btn];
+            
+            // 搜索到的poi点添加标注
+            MAPointAnnotation *annotation = [[MAPointAnnotation alloc] init];
+            annotation.coordinate = CLLocationCoordinate2DMake(poi.location.latitude, poi.location.longitude);
+            annotation.title = poi.name;
+            annotation.subtitle = poi.address;
+            [self.mapView addAnnotation:annotation];
+            [_annotations addObject:annotation];
+            
+            
+        }
+        //添加手势侦听
+        UISwipeGestureRecognizer *recognizer;
+        recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeFrom:)];
+        [recognizer setDirection:(UISwipeGestureRecognizerDirectionRight)];
+        [[self view] addGestureRecognizer:recognizer];
+        
+        recognizer = [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipeFrom:)];
+        [recognizer setDirection:(UISwipeGestureRecognizerDirectionLeft)];
+        [[self view] addGestureRecognizer:recognizer];
     }
+
+}
+
+//手势
+- (IBAction)handleSwipeFrom:(UISwipeGestureRecognizer *)sender{
+    //往左滑
+    if (sender.direction==UISwipeGestureRecognizerDirectionLeft )
+    {
+        currentTag=currentTag+1;
+        if(currentTag>(NSInteger)_pois.count-1){
+            currentTag=(NSInteger)_pois.count-1;
+        }
+    }
+    else if(sender.direction==UISwipeGestureRecognizerDirectionRight)
+    {//往右滑
+        currentTag=currentTag-1;
+        if(currentTag<(NSInteger)0){
+            currentTag=0;
+        }
+    }
+    [UIView beginAnimations:@"move" context:nil];
+    [UIView setAnimationDuration:.5];
+    [UIView setAnimationDelegate:self];
+    _resultsView.frame=CGRectMake(-width*(long)currentTag,height-100,width*_pois.count,80);
+    [UIView commitAnimations];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -167,8 +261,6 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 - (void)searchAction
 {
-    NSLog(@"_currentLocation %@", _currentLocation);
-    NSLog(@"search %@", _search);
     if (_currentLocation == nil || _search == nil)
     {
         NSLog(@"search failed");
@@ -209,8 +301,9 @@ typedef NS_ENUM(NSInteger, TravelTypes)
     [self.mapView setDelegate:self];
     
     //去掉状态栏后的屏幕尺寸
-    CGRect rect = [ UIScreen mainScreen ].applicationFrame;
-    [self.mapView setFrame:rect];
+    CGRect rectArea = [ UIScreen mainScreen ].applicationFrame;
+    
+    [self.mapView setFrame:rectArea];
     
     [self.view insertSubview:self.mapView atIndex:0];
     
@@ -253,9 +346,7 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 //    routeBtn.left = 60;
 //    routeBtn.top  = 175;
 //    [self.view addSubview:routeBtn];
-
 }
-
 
 - (void)initGestureRecognizer
 {
@@ -267,7 +358,7 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 - (UILabel *)createTitleLabel:(NSString *)title
 {
-//    NSLog(@"createTitleLabel");
+//  NSLog(@"createTitleLabel");
     UILabel *titleLabel = [[UILabel alloc] init];
     
     titleLabel.textAlignment = NSTextAlignmentLeft;
@@ -299,11 +390,7 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 - (void)initSettingState
 {
 //    NSLog(@"initSettingState");
-    _wayPointCombox.inputTextField.text   = @"";
-    _endPointCombox.inputTextField.text   = @"";
-    
     _beginAnnotation = nil;
-    _wayAnnotation   = nil;
     _endAnnotation   = nil;
     
     [self.mapView removeAnnotations:self.mapView.annotations];
@@ -371,34 +458,19 @@ typedef NS_ENUM(NSInteger, TravelTypes)
 
 - (void)calRoute
 {
-    NSArray *startPoints;
-    NSArray *wayPoints;
     NSArray *endPoints;
-    
-    if (_wayAnnotation)
-    {
-        wayPoints = @[[AMapNaviPoint locationWithLatitude:_wayAnnotation.coordinate.latitude
-                                                longitude:_wayAnnotation.coordinate.longitude]];
-    }
-    
-    if (_endAnnotation)
-    {
-        endPoints = @[[AMapNaviPoint locationWithLatitude:_endAnnotation.coordinate.latitude
-                                                longitude:_endAnnotation.coordinate.longitude]];
-    }
-    
-    if (_beginAnnotation)
-    {
-        startPoints = @[[AMapNaviPoint locationWithLatitude:_beginAnnotation.coordinate.latitude
-                                                  longitude:_beginAnnotation.coordinate.longitude]];
-    }
-    
+
+    AMapPOI *poi = _pois[currentTag];
+    endPoints = @[[AMapNaviPoint locationWithLatitude:poi.location.latitude
+                                                longitude:poi.location.longitude]];
+
     if (_startCurrLoc)
     {
         if (endPoints.count > 0)
         {
             if (_travelType == TravelTypeCar)
             {
+                NSLog(@"naviManager:%@",self.naviManager);
                 [self.naviManager calculateDriveRouteWithEndPoints:endPoints
                                                          wayPoints:nil
                                                    drivingStrategy:[_strategyMap[@"速度优先"] integerValue]];
@@ -406,28 +478,6 @@ typedef NS_ENUM(NSInteger, TravelTypes)
             return;
         }
     }
-    else
-    {
-        if (startPoints.count > 0 && endPoints.count > 0)
-        {
-            if (_travelType == TravelTypeCar)
-            {
-                [self.naviManager calculateDriveRouteWithStartPoints:startPoints
-                                                           endPoints:endPoints
-                                                           wayPoints:wayPoints
-                                                     drivingStrategy:[_strategyMap[_strategyCombox.inputTextField.text] integerValue]];
-            }
-            else if (_travelType == TravelTypeWalk)
-            {
-                [self.naviManager calculateWalkRouteWithStartPoints:startPoints endPoints:endPoints];
-            }
-            
-            return;
-        }
-    }
-    [self.view makeToast:@"请先在地图上选点"
-                duration:2.0
-                position:[NSValue valueWithCGPoint:CGPointMake(160, 240)]];
 
 }
 
